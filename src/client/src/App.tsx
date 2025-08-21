@@ -11,9 +11,16 @@ import {
   ModalBody, 
   ModalFooter, 
   useDisclosure,
-  Chip
+  Chip,
+  Progress,
+  Spacer,
+  Avatar,
+  Badge,
+  Divider,
+  Tabs,
+  Tab
 } from '@nextui-org/react'
-import { Plus } from 'lucide-react'
+import { Plus, Users, FileText, MessageCircle, Server, Database, Zap, Activity } from 'lucide-react'
 
 interface ApiResponse {
   status?: string;
@@ -184,273 +191,511 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="container mx-auto max-w-4xl space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold">🏓 PingPong</h1>
-          <p className="text-xl text-default-500">Fullstack app with Database Persistence</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
+      <div className="container mx-auto max-w-6xl p-6">
+        {/* Hero Section */}
+        <div className="text-center py-8 mb-8">
+          <div className="inline-flex items-center gap-3 mb-4">
+            <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-lg">
+              <span className="text-3xl">🏓</span>
+            </div>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              PingPong
+            </h1>
+          </div>
+          <p className="text-xl text-default-600 max-w-2xl mx-auto leading-relaxed">
+            A modern fullstack application showcasing real-time database persistence, 
+            built with cutting-edge technologies
+          </p>
+          <div className="flex justify-center gap-2 mt-4">
+            <Chip variant="flat" color="primary" startContent={<Server size={16} />}>
+              Bun Runtime
+            </Chip>
+            <Chip variant="flat" color="secondary" startContent={<Database size={16} />}>
+              SQLite + Drizzle
+            </Chip>
+            <Chip variant="flat" color="success" startContent={<Zap size={16} />}>
+              NextUI
+            </Chip>
+          </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <div className="flex flex-col">
-              <p className="text-md font-semibold">Server Status</p>
-              <p className="text-small text-default-500">Current server health and database connection</p>
-            </div>
-          </CardHeader>
-          <CardBody>
-            {healthStatus ? (
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium">Status:</span>
-                  <Chip 
-                    color={healthStatus.status === 'ok' ? 'success' : 'danger'}
-                    variant="flat"
-                    size="sm"
-                  >
-                    {healthStatus.status}
-                  </Chip>
+        {/* Status Cards Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Server Status Card */}
+          <Card className="shadow-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-0">
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-3">
+                <Avatar 
+                  icon={<Activity size={20} />}
+                  className="bg-gradient-to-r from-green-500 to-emerald-500"
+                  size="sm"
+                />
+                <div className="flex flex-col">
+                  <p className="text-lg font-bold text-green-700 dark:text-green-400">Server Status</p>
+                  <p className="text-small text-default-500">Real-time health monitoring</p>
                 </div>
-                <p className="text-sm"><strong>Message:</strong> {healthStatus.message}</p>
-                <p className="text-sm"><strong>Database:</strong> {healthStatus.database || 'unknown'}</p>
-                {healthStatus.timestamp && (
-                  <p className="text-sm"><strong>Time:</strong> {new Date(healthStatus.timestamp).toLocaleString()}</p>
-                )}
-              </div>
-            ) : (
-              <p className="text-sm text-default-400">Click "Check Health" to test server connection</p>
-            )}
-            <div className="flex flex-wrap gap-2 mt-4">
-              <Button onClick={checkHealth} disabled={loading} color="primary">
-                🔄 Check Health
-              </Button>
-            </div>
-          </CardBody>
-        </Card>
-
-        {stats && (
-          <Card>
-            <CardHeader>
-              <div className="flex flex-col">
-                <p className="text-md font-semibold">📊 Database Statistics</p>
-                <p className="text-small text-default-500">Current data in the database</p>
               </div>
             </CardHeader>
-            <CardBody>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-2xl font-bold text-primary">{stats.users}</div>
-                  <div className="text-sm text-default-500">Users</div>
+            <CardBody className="pt-0">
+              {healthStatus ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">System Status</span>
+                    <Chip 
+                      color={healthStatus.status === 'ok' ? 'success' : 'danger'}
+                      variant="shadow"
+                      size="sm"
+                      className="font-semibold"
+                    >
+                      {healthStatus.status === 'ok' ? '✅ Online' : '❌ Offline'}
+                    </Chip>
+                  </div>
+                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-3 space-y-2">
+                    <p className="text-sm"><strong>Message:</strong> {healthStatus.message}</p>
+                    <p className="text-sm"><strong>Database:</strong> {healthStatus.database || 'unknown'}</p>
+                    {healthStatus.timestamp && (
+                      <p className="text-xs text-default-400">
+                        Last check: {new Date(healthStatus.timestamp).toLocaleString()}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <div className="text-2xl font-bold text-primary">{stats.posts}</div>
-                  <div className="text-sm text-default-500">Posts</div>
+              ) : (
+                <div className="text-center py-4">
+                  <Progress size="sm" isIndeterminate className="mb-2" />
+                  <p className="text-sm text-default-400">Checking server status...</p>
                 </div>
-                <div>
-                  <div className="text-2xl font-bold text-primary">{stats.comments}</div>
-                  <div className="text-sm text-default-500">Comments</div>
-                </div>
-              </div>
-              <p className="text-xs text-default-400 text-center mt-2">
-                Updated: {new Date(stats.timestamp).toLocaleString()}
-              </p>
+              )}
+              <Spacer y={2} />
+              <Button 
+                onClick={checkHealth} 
+                disabled={loading} 
+                color="success"
+                variant="shadow"
+                className="w-full font-semibold"
+                startContent={<Activity size={16} />}
+              >
+                {loading ? 'Checking...' : 'Refresh Status'}
+              </Button>
             </CardBody>
           </Card>
-        )}
 
-        <Card>
-          <CardHeader>
-            <div className="flex flex-wrap gap-2">
-              <Button 
-                variant={activeTab === 'demo' ? 'solid' : 'bordered'}
-                onClick={() => setActiveTab('demo')}
-                color="primary"
-              >
-                Demo
-              </Button>
-              <Button 
-                variant={activeTab === 'users' ? 'solid' : 'bordered'}
-                onClick={() => { setActiveTab('users'); if (users.length === 0) fetchUsers(); }}
-                color="primary"
-              >
-                Users
-              </Button>
-              <Button 
-                variant={activeTab === 'posts' ? 'solid' : 'bordered'}
-                onClick={() => { setActiveTab('posts'); if (posts.length === 0) fetchPosts(); }}
-                color="primary"
-              >
-                Posts
-              </Button>
-            </div>
-          </CardHeader>
+          {/* Database Statistics Card */}
+          {stats && (
+            <Card className="shadow-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-0">
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-3">
+                  <Avatar 
+                    icon={<Database size={20} />}
+                    className="bg-gradient-to-r from-blue-500 to-indigo-500"
+                    size="sm"
+                  />
+                  <div className="flex flex-col">
+                    <p className="text-lg font-bold text-blue-700 dark:text-blue-400">Database Stats</p>
+                    <p className="text-small text-default-500">Live data metrics</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardBody className="pt-0">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+                    <div className="flex items-center justify-center mb-1">
+                      <Users size={16} className="text-blue-500 mr-1" />
+                      <span className="text-2xl font-bold text-blue-600">{stats.users}</span>
+                    </div>
+                    <div className="text-xs text-default-500">Users</div>
+                  </div>
+                  <div className="text-center p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+                    <div className="flex items-center justify-center mb-1">
+                      <FileText size={16} className="text-purple-500 mr-1" />
+                      <span className="text-2xl font-bold text-purple-600">{stats.posts}</span>
+                    </div>
+                    <div className="text-xs text-default-500">Posts</div>
+                  </div>
+                  <div className="text-center p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+                    <div className="flex items-center justify-center mb-1">
+                      <MessageCircle size={16} className="text-green-500 mr-1" />
+                      <span className="text-2xl font-bold text-green-600">{stats.comments}</span>
+                    </div>
+                    <div className="text-xs text-default-500">Comments</div>
+                  </div>
+                </div>
+                <p className="text-xs text-default-400 text-center mt-3">
+                  📊 Updated: {new Date(stats.timestamp).toLocaleString()}
+                </p>
+              </CardBody>
+            </Card>
+          )}
+        </div>
 
-          <CardBody>
-            {activeTab === 'demo' && (
-              <div className="space-y-4">
-                <div className="flex flex-col gap-2">
-                  <p className="text-md font-semibold">Interactive Demo</p>
+        {/* Main Content */}
+        <Card className="shadow-2xl border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+          <CardBody className="p-0">
+            <Tabs 
+              aria-label="Application features" 
+              color="primary"
+              variant="underlined"
+              classNames={{
+                tabList: "gap-6 w-full relative rounded-none p-6 border-b border-divider bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-900/20 dark:to-purple-900/20",
+                cursor: "w-full bg-gradient-to-r from-blue-500 to-purple-500",
+                tab: "max-w-fit px-4 py-3 h-12",
+                tabContent: "group-data-[selected=true]:text-primary font-semibold"
+              }}
+              selectedKey={activeTab}
+              onSelectionChange={(key) => {
+                const tabKey = key as string;
+                setActiveTab(tabKey);
+                if (tabKey === 'users' && users.length === 0) fetchUsers();
+                if (tabKey === 'posts' && posts.length === 0) fetchPosts();
+              }}
+            >
+              <Tab 
+                key="demo" 
+                title={
                   <div className="flex items-center space-x-2">
-                    <Button onClick={() => setCount((count) => count + 1)} color="secondary">
-                      count is {count}
-                    </Button>
+                    <Zap size={18} />
+                    <span>Interactive Demo</span>
                   </div>
-                </div>
-
-                <div className="flex space-x-2">
-                  <Button onClick={pingServer} disabled={loading} color="primary">
-                    🏓 Ping Server
-                  </Button>
-                  <Button onClick={sendEcho} disabled={loading} color="primary">
-                    📡 Send Echo
-                  </Button>
-                </div>
-
-                {loading && <p className="text-default-500">Loading...</p>}
-
-                {echoResult && (
-                  <Card>
-                    <CardHeader>
-                      <p className="text-lg font-semibold">Server Response:</p>
-                    </CardHeader>
-                    <CardBody>
-                      <pre className="text-sm bg-default-100 p-3 rounded-md overflow-auto">
-                        {JSON.stringify(echoResult, null, 2)}
-                      </pre>
-                    </CardBody>
-                  </Card>
-                )}
-              </div>
-            )}
-
-            {activeTab === 'users' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-md font-semibold">👥 Users</p>
-                  <div className="flex gap-2">
-                    <Button onClick={fetchUsers} disabled={loading} color="primary" variant="bordered">
-                      🔄 Refresh Users
-                    </Button>
-                    <Button onPress={onOpen} color="primary">
-                      <Plus size={16} />
-                      Add User
-                    </Button>
+                }
+              >
+                <div className="p-6 space-y-6">
+                  {/* Counter Demo */}
+                  <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-xl p-6">
+                    <h3 className="text-xl font-bold text-orange-700 dark:text-orange-400 mb-4">🎯 Counter Demo</h3>
+                    <div className="flex items-center justify-center gap-4">
+                      <Button 
+                        onClick={() => setCount((count) => count + 1)} 
+                        color="warning"
+                        variant="shadow"
+                        size="lg"
+                        className="font-bold px-8"
+                      >
+                        Count: {count} 🚀
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                {loading && <p className="text-default-500">Loading users...</p>}
-                {users.length > 0 && (
-                  <div className="space-y-3">
-                    {users.map(user => (
-                      <Card key={user.id}>
-                        <CardBody>
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h4 className="font-semibold">{user.username}</h4>
-                              <p className="text-sm text-default-500">{user.email}</p>
-                              <p className="text-xs text-default-400">ID: {user.id}</p>
-                            </div>
-                            <p className="text-xs text-default-400">
-                              Created: {new Date(user.createdAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </CardBody>
-                      </Card>
-                    ))}
-                  </div>
-                )}
 
-                <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-                  <ModalContent>
-                    {(onClose) => (
-                      <>
-                        <ModalHeader className="flex flex-col gap-1">Create New User</ModalHeader>
-                        <ModalBody>
-                          <Input
-                            autoFocus
-                            label="Username"
-                            placeholder="Enter username"
-                            variant="bordered"
-                            value={newUser.username}
-                            onChange={(e) => setNewUser(prev => ({ ...prev, username: e.target.value }))}
-                          />
-                          <Input
-                            label="Email"
-                            placeholder="Enter email"
-                            variant="bordered"
-                            value={newUser.email}
-                            onChange={(e) => setNewUser(prev => ({ ...prev, email: e.target.value }))}
-                          />
-                        </ModalBody>
-                        <ModalFooter>
-                          <Button color="danger" variant="light" onPress={onClose}>
-                            Cancel
-                          </Button>
-                          <Button color="primary" onPress={createUser} disabled={loading}>
-                            {loading ? 'Creating...' : 'Create User'}
-                          </Button>
-                        </ModalFooter>
-                      </>
+                  {/* API Demo */}
+                  <div className="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-xl p-6">
+                    <h3 className="text-xl font-bold text-cyan-700 dark:text-cyan-400 mb-4">🌐 API Testing</h3>
+                    <div className="flex flex-wrap gap-3 justify-center">
+                      <Button 
+                        onClick={pingServer} 
+                        disabled={loading} 
+                        color="primary"
+                        variant="shadow"
+                        startContent={<Activity size={16} />}
+                        className="font-semibold"
+                      >
+                        🏓 Ping Server
+                      </Button>
+                      <Button 
+                        onClick={sendEcho} 
+                        disabled={loading} 
+                        color="secondary"
+                        variant="shadow"
+                        startContent={<MessageCircle size={16} />}
+                        className="font-semibold"
+                      >
+                        📡 Send Echo
+                      </Button>
+                    </div>
+
+                    {loading && (
+                      <div className="mt-4 text-center">
+                        <Progress size="sm" isIndeterminate className="mb-2" />
+                        <p className="text-default-500">Processing request...</p>
+                      </div>
                     )}
-                  </ModalContent>
-                </Modal>
-              </div>
-            )}
 
-            {activeTab === 'posts' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-md font-semibold">📝 Published Posts</p>
-                  <Button onClick={fetchPosts} disabled={loading} color="primary" variant="bordered">
-                    🔄 Refresh Posts
-                  </Button>
-                </div>
-                {loading && <p className="text-default-500">Loading posts...</p>}
-                {posts.length > 0 && (
-                  <div className="space-y-3">
-                    {posts.map(post => (
-                      <Card key={post.id}>
-                        <CardBody>
-                          <h4 className="font-semibold">{post.title}</h4>
-                          <p className="text-sm text-default-600">{post.content.substring(0, 200)}...</p>
-                          <p className="text-sm text-default-400">Published: {new Date(post.createdAt).toLocaleDateString()}</p>
-                        </CardBody>
-                      </Card>
-                    ))}
+                    {echoResult && (
+                      <div className="mt-6">
+                        <Card className="bg-white/80 dark:bg-gray-800/80">
+                          <CardHeader>
+                            <p className="text-lg font-semibold text-success">✅ Server Response</p>
+                          </CardHeader>
+                          <CardBody>
+                            <pre className="text-sm bg-gray-100 dark:bg-gray-900 p-4 rounded-lg overflow-auto border">
+                              {JSON.stringify(echoResult, null, 2)}
+                            </pre>
+                          </CardBody>
+                        </Card>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              </Tab>
+
+              <Tab 
+                key="users" 
+                title={
+                  <div className="flex items-center space-x-2">
+                    <Users size={18} />
+                    <span>Users</span>
+                    <Badge content={users.length.toString()} color="primary" size="sm">
+                      <span></span>
+                    </Badge>
+                  </div>
+                }
+              >
+                <div className="p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-blue-700 dark:text-blue-400">👥 User Management</h3>
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={fetchUsers} 
+                        disabled={loading} 
+                        color="primary" 
+                        variant="bordered"
+                        startContent={<Activity size={16} />}
+                      >
+                        Refresh
+                      </Button>
+                      <Button 
+                        onPress={onOpen} 
+                        color="primary"
+                        variant="shadow"
+                        startContent={<Plus size={16} />}
+                        className="font-semibold"
+                      >
+                        Add User
+                      </Button>
+                    </div>
+                  </div>
+
+                  {loading && (
+                    <div className="text-center py-8">
+                      <Progress size="md" isIndeterminate className="mb-4" />
+                      <p className="text-default-500">Loading users...</p>
+                    </div>
+                  )}
+
+                  {users.length > 0 && (
+                    <div className="grid gap-4">
+                      {users.map(user => (
+                        <Card 
+                          key={user.id} 
+                          className="shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-0"
+                        >
+                          <CardBody className="p-4">
+                            <div className="flex items-center gap-4">
+                              <Avatar 
+                                name={user.username}
+                                className="bg-gradient-to-r from-blue-500 to-purple-500"
+                                size="lg"
+                              />
+                              <div className="flex-grow">
+                                <h4 className="font-bold text-lg text-blue-700 dark:text-blue-400">{user.username}</h4>
+                                <p className="text-default-600">{user.email}</p>
+                                <div className="flex items-center gap-4 mt-2">
+                                  <Chip size="sm" variant="flat" color="default">
+                                    ID: {user.id}
+                                  </Chip>
+                                  <p className="text-xs text-default-400">
+                                    📅 {new Date(user.createdAt).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </CardBody>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Tab>
+
+              <Tab 
+                key="posts" 
+                title={
+                  <div className="flex items-center space-x-2">
+                    <FileText size={18} />
+                    <span>Posts</span>
+                    <Badge content={posts.length.toString()} color="secondary" size="sm">
+                      <span></span>
+                    </Badge>
+                  </div>
+                }
+              >
+                <div className="p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-purple-700 dark:text-purple-400">📝 Published Posts</h3>
+                    <Button 
+                      onClick={fetchPosts} 
+                      disabled={loading} 
+                      color="secondary" 
+                      variant="bordered"
+                      startContent={<Activity size={16} />}
+                    >
+                      Refresh Posts
+                    </Button>
+                  </div>
+
+                  {loading && (
+                    <div className="text-center py-8">
+                      <Progress size="md" isIndeterminate className="mb-4" />
+                      <p className="text-default-500">Loading posts...</p>
+                    </div>
+                  )}
+
+                  {posts.length > 0 && (
+                    <div className="grid gap-6">
+                      {posts.map(post => (
+                        <Card 
+                          key={post.id} 
+                          className="shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-0"
+                        >
+                          <CardBody className="p-6">
+                            <div className="flex items-start gap-4">
+                              <Avatar 
+                                icon={<FileText size={20} />}
+                                className="bg-gradient-to-r from-purple-500 to-pink-500"
+                              />
+                              <div className="flex-grow">
+                                <h4 className="font-bold text-xl text-purple-700 dark:text-purple-400 mb-2">
+                                  {post.title}
+                                </h4>
+                                <p className="text-default-600 leading-relaxed mb-4">
+                                  {post.content.length > 200 
+                                    ? `${post.content.substring(0, 200)}...` 
+                                    : post.content}
+                                </p>
+                                <div className="flex items-center gap-3">
+                                  <Chip size="sm" variant="flat" color="success">
+                                    ✅ Published
+                                  </Chip>
+                                  <p className="text-xs text-default-400">
+                                    📅 {new Date(post.createdAt).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </CardBody>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Tab>
+            </Tabs>
           </CardBody>
         </Card>
 
-        <Card>
+        {/* User Creation Modal */}
+        <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur">
+          <ModalContent>
+            {(onClose) => (
+              <>
+                <ModalHeader className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <Avatar icon={<Users size={20} />} className="bg-gradient-to-r from-blue-500 to-purple-500" size="sm" />
+                    <span>Create New User</span>
+                  </div>
+                </ModalHeader>
+                <ModalBody>
+                  <Input
+                    autoFocus
+                    label="Username"
+                    placeholder="Enter username"
+                    variant="bordered"
+                    startContent={<Users size={16} />}
+                    value={newUser.username}
+                    onChange={(e) => setNewUser(prev => ({ ...prev, username: e.target.value }))}
+                  />
+                  <Input
+                    label="Email"
+                    placeholder="Enter email address"
+                    variant="bordered"
+                    startContent={<span>@</span>}
+                    value={newUser.email}
+                    onChange={(e) => setNewUser(prev => ({ ...prev, email: e.target.value }))}
+                  />
+                </ModalBody>
+                <ModalFooter>
+                  <Button color="danger" variant="light" onPress={onClose}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    color="primary" 
+                    onPress={createUser} 
+                    disabled={loading}
+                    startContent={loading ? undefined : <Plus size={16} />}
+                  >
+                    {loading ? 'Creating...' : 'Create User'}
+                  </Button>
+                </ModalFooter>
+              </>
+            )}
+          </ModalContent>
+        </Modal>
+
+        {/* Tech Stack Section */}
+        <Card className="shadow-xl bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800 dark:to-slate-800 border-0">
           <CardHeader>
-            <div className="flex flex-col">
-              <p className="text-md font-semibold">🛠️ Tech Stack</p>
-              <p className="text-small text-default-500">Technologies used in this application</p>
+            <div className="flex items-center gap-3">
+              <Avatar 
+                icon={<Activity size={20} />}
+                className="bg-gradient-to-r from-gray-600 to-slate-600"
+                size="sm"
+              />
+              <div className="flex flex-col">
+                <p className="text-lg font-bold text-gray-700 dark:text-gray-300">🛠️ Tech Stack</p>
+                <p className="text-small text-default-500">Modern technologies powering this application</p>
+              </div>
             </div>
           </CardHeader>
           <CardBody>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <div className="space-y-1">
-                <h4 className="font-medium">Frontend</h4>
-                <ul className="text-sm text-default-600 space-y-1">
-                  <li>• React 18 with TypeScript</li>
-                  <li>• NextUI (Components)</li>
-                  <li>• Tailwind CSS (Styling)</li>
-                  <li>• Vite (Build Tool)</li>
-                  <li>• Lucide React (Icons)</li>
-                </ul>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="bg-white/80 dark:bg-gray-700/50 rounded-lg p-4">
+                  <h4 className="font-bold text-blue-600 dark:text-blue-400 mb-3 flex items-center gap-2">
+                    <span>🎨</span> Frontend
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Chip size="sm" variant="flat" color="primary">React 18</Chip>
+                      <span className="text-sm">+ TypeScript</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Chip size="sm" variant="flat" color="secondary">NextUI</Chip>
+                      <span className="text-sm">Modern Components</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Chip size="sm" variant="flat" color="success">Tailwind CSS</Chip>
+                      <span className="text-sm">Utility-first</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Chip size="sm" variant="flat" color="warning">Vite</Chip>
+                      <span className="text-sm">Lightning Fast</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="space-y-1">
-                <h4 className="font-medium">Backend</h4>
-                <ul className="text-sm text-default-600 space-y-1">
-                  <li>• Bun Runtime</li>
-                  <li>• TypeScript</li>
-                  <li>• SQLite Database</li>
-                  <li>• Drizzle ORM</li>
-                  <li>• RESTful API</li>
-                </ul>
+              <div className="space-y-4">
+                <div className="bg-white/80 dark:bg-gray-700/50 rounded-lg p-4">
+                  <h4 className="font-bold text-purple-600 dark:text-purple-400 mb-3 flex items-center gap-2">
+                    <span>⚡</span> Backend
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Chip size="sm" variant="flat" color="primary">Bun Runtime</Chip>
+                      <span className="text-sm">Ultra Fast</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Chip size="sm" variant="flat" color="secondary">Hono</Chip>
+                      <span className="text-sm">Web Framework</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Chip size="sm" variant="flat" color="success">SQLite</Chip>
+                      <span className="text-sm">+ Drizzle ORM</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Chip size="sm" variant="flat" color="warning">TypeScript</Chip>
+                      <span className="text-sm">Type Safety</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </CardBody>
