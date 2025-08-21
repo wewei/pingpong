@@ -1,5 +1,6 @@
 import { db } from './index';
-import { userService, postService, commentService } from './services';
+import { userService } from './services';
+import { users, pingpongs, messages, metadata } from './schema';
 
 async function seed() {
   try {
@@ -26,96 +27,119 @@ async function seed() {
 
     console.log(`👥 Created ${3} users`);
 
-    // 创建示例文章
-    const post1 = await postService.createPost({
-      title: 'Welcome to PingPong!',
-      content: `# Welcome to PingPong!
+    // 创建示例 PingPongs
+    const pingpong1 = await db.insert(pingpongs).values({
+      title: '设计新的用户界面',
+      description: '需要为PingPong系统设计一个现代化的用户界面，包括任务列表、详情页面和创建表单。',
+      requesterId: user1.id,
+      responderId: user2.id,
+      status: 'ping',
+      priority: 'high',
+      eta: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7天后
+    }).returning();
 
-This is our first blog post. PingPong is a modern fullstack application built with:
+    const pingpong2 = await db.insert(pingpongs).values({
+      title: '实现WebSocket实时通信',
+      description: '为消息系统添加WebSocket支持，实现实时消息推送功能。',
+      requesterId: user2.id,
+      responderId: user3.id,
+      status: 'pong',
+      priority: 'medium',
+      eta: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3天后
+    }).returning();
 
-- **Backend**: Bun + Hono
-- **Frontend**: React + TypeScript
-- **Database**: SQLite (development) / PostgreSQL (production)
-- **ORM**: Drizzle ORM
+    const pingpong3 = await db.insert(pingpongs).values({
+      title: '编写API文档',
+      description: '为所有的API端点编写详细的文档，包括请求参数和响应格式。',
+      requesterId: user1.id,
+      responderId: user3.id,
+      status: 'closed',
+      priority: 'low',
+      eta: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2天前
+      closedAt: new Date().toISOString(),
+    }).returning();
 
-We hope you enjoy using our platform!`,
-      authorId: user1.id,
-      published: true
-    });
+    console.log(`🏓 Created ${3} pingpongs`);
 
-    const post2 = await postService.createPost({
-      title: 'Building Modern Web Apps',
-      content: `# Building Modern Web Apps
+    // 创建示例消息
+    await db.insert(messages).values([
+      {
+        pingpongId: pingpong1[0].id,
+        senderId: user2.id,
+        content: '我已经收到了这个任务，正在分析需求。你希望界面风格是什么样的？',
+        messageType: 'text',
+      },
+      {
+        pingpongId: pingpong1[0].id,
+        senderId: user1.id,
+        content: '我希望是简洁现代的风格，类似于现在流行的设计系统，比如Material Design或者Ant Design。',
+        messageType: 'text',
+      },
+      {
+        pingpongId: pingpong2[0].id,
+        senderId: user3.id,
+        content: '好的，我会使用Socket.io来实现。预计明天就能完成基础功能。',
+        messageType: 'text',
+      },
+      {
+        pingpongId: pingpong3[0].id,
+        senderId: user3.id,
+        content: 'API文档已经完成，已经部署到了/docs路径。',
+        messageType: 'text',
+      },
+      {
+        pingpongId: pingpong3[0].id,
+        senderId: user3.id,
+        content: '任务已完成并关闭。',
+        messageType: 'system',
+      },
+    ]);
 
-In this post, we'll explore the technologies that power modern web applications:
+    console.log(`💬 Created ${5} messages`);
 
-## Frontend Technologies
-- React for UI components
-- TypeScript for type safety
-- Vite for fast development
+    // 创建示例元数据
+    await db.insert(metadata).values([
+      {
+        userId: user1.id,
+        pingpongId: pingpong1[0].id,
+        name: '优先级',
+        value: '紧急',
+      },
+      {
+        userId: user1.id,
+        pingpongId: pingpong1[0].id,
+        name: '类别',
+        value: '前端开发',
+      },
+      {
+        userId: user2.id,
+        pingpongId: pingpong2[0].id,
+        name: '技术栈',
+        value: 'Node.js + Socket.io',
+      },
+      {
+        userId: user3.id,
+        pingpongId: pingpong3[0].id,
+        name: '文档类型',
+        value: 'OpenAPI 3.0',
+      },
+    ]);
 
-## Backend Technologies
-- Bun as the JavaScript runtime
-- Hono for the web framework
-- Drizzle ORM for database operations
-
-Stay tuned for more content!`,
-      authorId: user2.id,
-      published: true
-    });
-
-    const post3 = await postService.createPost({
-      title: 'Draft: Future Features',
-      content: `# Future Features
-
-This is a draft post outlining future features:
-
-- User authentication
-- File uploads
-- Real-time notifications
-- Search functionality`,
-      authorId: user1.id,
-      published: false
-    });
-
-    console.log(`📝 Created ${3} posts`);
-
-    // 创建示例评论
-    await commentService.createComment({
-      content: 'Great introduction! Looking forward to learning more.',
-      postId: post1.id,
-      authorId: user2.id
-    });
-
-    await commentService.createComment({
-      content: 'Thanks for sharing this. The tech stack looks impressive!',
-      postId: post1.id,
-      authorId: user3.id
-    });
-
-    await commentService.createComment({
-      content: 'Very informative post about modern web development.',
-      postId: post2.id,
-      authorId: user1.id
-    });
-
-    await commentService.createComment({
-      content: 'I love the Bun + Hono combination!',
-      postId: post2.id,
-      authorId: user3.id
-    });
-
-    console.log(`💬 Created ${4} comments`);
+    console.log(`🏷️ Created ${4} metadata items`);
 
     // 显示统计信息
     const userCount = await userService.getUserCount();
-    const postCount = await postService.getPostCount();
-    const commentCount = await commentService.getCommentCount();
+    
+    // 统计PingPong相关数据
+    const pingpongCount = await db.$count(pingpongs);
+    const messageCount = await db.$count(messages);
+    const metadataCount = await db.$count(metadata);
 
     console.log('\n📊 Database seeded successfully!');
     console.log(`   Users: ${userCount}`);
-    console.log(`   Posts: ${postCount}`);
-    console.log(`   Comments: ${commentCount}`);
+    console.log(`   PingPongs: ${pingpongCount}`);
+    console.log(`   Messages: ${messageCount}`);
+    console.log(`   Metadata: ${metadataCount}`);
 
   } catch (error) {
     console.error('❌ Error seeding database:', error);
