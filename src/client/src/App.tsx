@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react'
-import './App.css'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
+import { Button } from './components/ui/button'
+import { Input } from './components/ui/input'
+import { Label } from './components/ui/label'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './components/ui/dialog'
+import { Plus } from 'lucide-react'
 
 interface ApiResponse {
   status?: string;
@@ -41,6 +46,8 @@ function App() {
   const [posts, setPosts] = useState<Post[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [activeTab, setActiveTab] = useState('demo')
+  const [isCreateUserOpen, setIsCreateUserOpen] = useState(false)
+  const [newUser, setNewUser] = useState({ username: '', email: '' })
 
   useEffect(() => {
     // Check server health on component mount
@@ -139,152 +146,286 @@ function App() {
     }
   }
 
-  return (
-    <div className="app">
-      <div className="container">
-        <h1>🏓 PingPong</h1>
-        <p className="subtitle">Fullstack app with Database Persistence</p>
+  const createUser = async () => {
+    if (!newUser.username || !newUser.email) return
+    
+    try {
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newUser)
+      })
+      
+      if (response.ok) {
+        setNewUser({ username: '', email: '' })
+        setIsCreateUserOpen(false)
+        fetchUsers()
+        fetchStats()
+      }
+    } catch (error) {
+      console.error('Failed to create user:', error)
+    }
+  }
 
-        <div className="card">
-          <h2>Server Status</h2>
-          {healthStatus ? (
-            <div className={`status ${healthStatus.status === 'ok' ? 'ok' : 'error'}`}>
-              <p><strong>Status:</strong> {healthStatus.status}</p>
-              <p><strong>Message:</strong> {healthStatus.message}</p>
-              <p><strong>Database:</strong> {healthStatus.database || 'unknown'}</p>
-              {healthStatus.timestamp && (
-                <p><strong>Time:</strong> {new Date(healthStatus.timestamp).toLocaleString()}</p>
-              )}
-            </div>
-          ) : (
-            <p>Checking server...</p>
-          )}
+  return (
+    <div className="min-h-screen bg-background p-4">
+      <div className="container mx-auto max-w-4xl space-y-6">
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold text-foreground">🏓 PingPong</h1>
+          <p className="text-xl text-muted-foreground">Fullstack app with Database Persistence</p>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Server Status</CardTitle>
+            <CardDescription>Current server health and database connection</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {healthStatus ? (
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium">Status:</span>
+                  <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                    healthStatus.status === 'ok' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {healthStatus.status}
+                  </span>
+                </div>
+                <p className="text-sm"><strong>Message:</strong> {healthStatus.message}</p>
+                <p className="text-sm"><strong>Database:</strong> {healthStatus.database || 'unknown'}</p>
+                {healthStatus.timestamp && (
+                  <p className="text-sm"><strong>Time:</strong> {new Date(healthStatus.timestamp).toLocaleString()}</p>
+                )}
+              </div>
+            ) : (
+              <p className="text-muted-foreground">Checking server...</p>
+            )}
+          </CardContent>
+        </Card>
 
         {stats && (
-          <div className="card">
-            <h2>📊 Database Statistics</h2>
-            <div className="stats-grid">
-              <div className="stat-item">
-                <span className="stat-number">{stats.users}</span>
-                <span className="stat-label">Users</span>
+          <Card>
+            <CardHeader>
+              <CardTitle>📊 Database Statistics</CardTitle>
+              <CardDescription>Current data in the database</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="space-y-2">
+                  <div className="text-2xl font-bold text-primary">{stats.users}</div>
+                  <div className="text-sm text-muted-foreground">Users</div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-2xl font-bold text-primary">{stats.posts}</div>
+                  <div className="text-sm text-muted-foreground">Posts</div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-2xl font-bold text-primary">{stats.comments}</div>
+                  <div className="text-sm text-muted-foreground">Comments</div>
+                </div>
               </div>
-              <div className="stat-item">
-                <span className="stat-number">{stats.posts}</span>
-                <span className="stat-label">Posts</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">{stats.comments}</span>
-                <span className="stat-label">Comments</span>
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         )}
 
-        <div className="card">
-          <div className="tabs">
-            <button
-              className={`tab-button ${activeTab === 'demo' ? 'active' : ''}`}
-              onClick={() => setActiveTab('demo')}
-            >
-              API Demo
-            </button>
-            <button
-              className={`tab-button ${activeTab === 'users' ? 'active' : ''}`}
-              onClick={() => { setActiveTab('users'); if (users.length === 0) fetchUsers(); }}
-            >
-              Users
-            </button>
-            <button
-              className={`tab-button ${activeTab === 'posts' ? 'active' : ''}`}
-              onClick={() => { setActiveTab('posts'); if (posts.length === 0) fetchPosts(); }}
-            >
-              Posts
-            </button>
-          </div>
+        <Card>
+          <CardHeader>
+            <div className="flex space-x-1">
+              <Button
+                variant={activeTab === 'demo' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('demo')}
+              >
+                API Demo
+              </Button>
+              <Button
+                variant={activeTab === 'users' ? 'default' : 'outline'}
+                onClick={() => { setActiveTab('users'); if (users.length === 0) fetchUsers(); }}
+              >
+                Users
+              </Button>
+              <Button
+                variant={activeTab === 'posts' ? 'default' : 'outline'}
+                onClick={() => { setActiveTab('posts'); if (posts.length === 0) fetchPosts(); }}
+              >
+                Posts
+              </Button>
+            </div>
+          </CardHeader>
 
-          {activeTab === 'demo' && (
-            <div className="tab-content">
-              <h2>Interactive Demo</h2>
-              <div className="counter">
-                <button onClick={() => setCount((count) => count + 1)}>
-                  count is {count}
-                </button>
+          <CardContent>
+            {activeTab === 'demo' && (
+              <div className="space-y-4">
+                <CardTitle>Interactive Demo</CardTitle>
+                <div className="flex items-center space-x-2">
+                  <Button onClick={() => setCount((count) => count + 1)}>
+                    count is {count}
+                  </Button>
+                </div>
+
+                <div className="flex space-x-2">
+                  <Button onClick={pingServer} disabled={loading}>
+                    🏓 Ping Server
+                  </Button>
+                  <Button onClick={sendEcho} disabled={loading}>
+                    📡 Send Echo
+                  </Button>
+                </div>
+
+                {loading && <p className="text-muted-foreground">Loading...</p>}
+
+                {echoResult && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Server Response:</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <pre className="text-sm bg-muted p-3 rounded-md overflow-auto">
+                        {JSON.stringify(echoResult, null, 2)}
+                      </pre>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
+            )}
 
-              <div className="api-buttons">
-                <button onClick={pingServer} disabled={loading}>
-                  🏓 Ping Server
-                </button>
-                <button onClick={sendEcho} disabled={loading}>
-                  📡 Send Echo
-                </button>
+            {activeTab === 'users' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle>👥 Users</CardTitle>
+                  <Button onClick={fetchUsers} disabled={loading}>
+                    🔄 Refresh Users
+                  </Button>
+                </div>
+                {loading && <p className="text-muted-foreground">Loading users...</p>}
+                {users.length > 0 && (
+                  <div className="space-y-3">
+                    {users.map(user => (
+                      <Card key={user.id}>
+                        <CardContent className="pt-6">
+                          <h4 className="font-semibold">{user.username}</h4>
+                          <p className="text-sm text-muted-foreground">Email: {user.email}</p>
+                          <p className="text-sm text-muted-foreground">Joined: {new Date(user.createdAt).toLocaleDateString()}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+                <Dialog open={isCreateUserOpen} onOpenChange={setIsCreateUserOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add User
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create New User</DialogTitle>
+                      <DialogDescription>
+                        Enter the details of the new user to create an account.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="username">Username</Label>
+                        <Input
+                          id="username"
+                          value={newUser.username}
+                          onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                          placeholder="Enter username"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={newUser.email}
+                          onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                          placeholder="Enter email"
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsCreateUserOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button onClick={createUser} disabled={loading}>
+                        {loading ? 'Creating...' : 'Create User'}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
+            )}
 
-              {loading && <p>Loading...</p>}
-
-              {echoResult && (
-                <div className="api-result">
-                  <h3>Server Response:</h3>
-                  <pre>{JSON.stringify(echoResult, null, 2)}</pre>
+            {activeTab === 'posts' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle>📝 Published Posts</CardTitle>
+                  <Button onClick={fetchPosts} disabled={loading}>
+                    🔄 Refresh Posts
+                  </Button>
                 </div>
-              )}
-            </div>
-          )}
+                {loading && <p className="text-muted-foreground">Loading posts...</p>}
+                {posts.length > 0 && (
+                  <div className="space-y-3">
+                    {posts.map(post => (
+                      <Card key={post.id}>
+                        <CardContent className="pt-6">
+                          <h4 className="font-semibold">{post.title}</h4>
+                          <p className="text-sm text-muted-foreground">{post.content.substring(0, 200)}...</p>
+                          <p className="text-sm text-muted-foreground">Published: {new Date(post.createdAt).toLocaleDateString()}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-          {activeTab === 'users' && (
-            <div className="tab-content">
-              <h2>👥 Users</h2>
-              <button onClick={fetchUsers} disabled={loading}>
-                🔄 Refresh Users
-              </button>
-              {loading && <p>Loading users...</p>}
-              {users.length > 0 && (
-                <div className="data-list">
-                  {users.map(user => (
-                    <div key={user.id} className="data-item">
-                      <h4>{user.username}</h4>
-                      <p>Email: {user.email}</p>
-                      <p>Joined: {new Date(user.createdAt).toLocaleDateString()}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
+        <Card>
+          <CardHeader>
+            <CardTitle>🛠️ Tech Stack</CardTitle>
+            <CardDescription>Technologies used in this application</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div className="flex justify-between">
+                <span className="font-medium">Runtime:</span>
+                <span className="text-muted-foreground">Bun</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Backend:</span>
+                <span className="text-muted-foreground">Hono + Drizzle ORM</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Database:</span>
+                <span className="text-muted-foreground">SQLite (dev) / PostgreSQL (prod)</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Frontend:</span>
+                <span className="text-muted-foreground">React + TypeScript</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Build Tool:</span>
+                <span className="text-muted-foreground">Vite</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">UI Components:</span>
+                <span className="text-muted-foreground">Radix UI + Tailwind CSS</span>
+              </div>
             </div>
-          )}
-
-          {activeTab === 'posts' && (
-            <div className="tab-content">
-              <h2>📝 Published Posts</h2>
-              <button onClick={fetchPosts} disabled={loading}>
-                🔄 Refresh Posts
-              </button>
-              {loading && <p>Loading posts...</p>}
-              {posts.length > 0 && (
-                <div className="data-list">
-                  {posts.map(post => (
-                    <div key={post.id} className="data-item">
-                      <h4>{post.title}</h4>
-                      <p>{post.content.substring(0, 200)}...</p>
-                      <p>Published: {new Date(post.createdAt).toLocaleDateString()}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="card">
-          <h2>🛠️ Tech Stack</h2>
-          <ul>
-            <li><strong>Runtime:</strong> Bun</li>
-            <li><strong>Backend:</strong> Hono + Drizzle ORM</li>
-            <li><strong>Database:</strong> SQLite (dev) / PostgreSQL (prod)</li>
-            <li><strong>Frontend:</strong> React + TypeScript</li>
-            <li><strong>Build Tool:</strong> Vite</li>
-          </ul>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
