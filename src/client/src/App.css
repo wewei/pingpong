@@ -115,6 +115,92 @@ h1 {
   border: 1px solid #30363d;
 }
 
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 1rem;
+  background-color: rgba(100, 108, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(100, 108, 255, 0.2);
+}
+
+.stat-number {
+  display: block;
+  font-size: 2em;
+  font-weight: bold;
+  color: #646cff;
+}
+
+.stat-label {
+  display: block;
+  margin-top: 0.5rem;
+  color: #888;
+  text-transform: uppercase;
+  font-size: 0.8em;
+  letter-spacing: 0.1em;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #333;
+}
+
+.tab-button {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.tab-button:hover {
+  color: #646cff;
+  border-bottom-color: rgba(100, 108, 255, 0.3);
+}
+
+.tab-button.active {
+  color: #646cff;
+  border-bottom-color: #646cff;
+}
+
+.tab-content {
+  min-height: 300px;
+}
+
+.data-list {
+  margin-top: 1rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.data-item {
+  padding: 1rem;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.data-item h4 {
+  margin: 0 0 0.5rem 0;
+  color: #646cff;
+}
+
+.data-item p {
+  margin: 0.25rem 0;
+  color: #ccc;
+  font-size: 0.9em;
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;

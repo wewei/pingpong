@@ -15,6 +15,12 @@ A modern fullstack website built with Bun, featuring a React frontend and Hono b
 pingpong/
 ├── src/
 │   ├── server/           # Backend code (Hono)
+│   │   ├── db/           # Database layer
+│   │   │   ├── schema/   # Database schema definitions
+│   │   │   ├── services/ # Data access services
+│   │   │   ├── migrations/ # Database migrations
+│   │   │   ├── seed.ts   # Database seeding script
+│   │   │   └── index.ts  # Database connection
 │   │   └── index.ts      # Server entry point
 │   └── client/           # Frontend code (React)
 │       ├── src/
@@ -24,6 +30,10 @@ pingpong/
 │       │   └── index.css # Global styles
 │       ├── index.html    # HTML template
 │       └── vite.config.ts # Vite configuration
+├── data/                 # Database files (ignored by Git)
+│   ├── dev.db           # Development database
+│   ├── README.md        # Database documentation
+│   └── .env.example     # Database environment examples
 ├── dist/                 # Production build output
 ├── package.json          # Root dependencies
 └── README.md            # This file
@@ -64,11 +74,35 @@ curl -fsSL https://bun.sh/install | bash
 - **Build for production**: `bun run build`
 - **Start production server**: `bun run start`
 
+### Database Commands
+
+- **Generate migrations**: `bun run db:generate`
+- **Apply migrations**: `bun run db:push`
+- **Seed with sample data**: `bun run db:seed`
+- **Open database studio**: `bun run db:studio`
+- **Reset database**: `bun run db:reset` (Unix) or `bun run db:reset:win` (Windows)
+
 ## 🌐 API Endpoints
 
+### Core Endpoints
 - `GET /api/health` - Health check endpoint
-- `GET /api/ping` - Simple ping endpoint
+- `GET /api/ping` - Simple ping endpoint  
 - `POST /api/echo` - Echo back the request body
+- `GET /api/stats` - Database statistics
+
+### User Management
+- `GET /api/users` - List all users
+- `GET /api/users/:id` - Get user by ID
+- `POST /api/users` - Create new user
+
+### Posts & Content
+- `GET /api/posts` - List posts (add `?published=true` for published only)
+- `GET /api/posts/:id` - Get post by ID
+- `POST /api/posts` - Create new post
+
+### Comments
+- `GET /api/posts/:id/comments` - Get comments for a post
+- `POST /api/posts/:id/comments` - Add comment to a post
 
 ## 🎯 Features
 
