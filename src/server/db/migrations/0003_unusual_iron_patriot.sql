@@ -1,0 +1,1 @@
+ALTER TABLE `pingpongs` DROP COLUMN `priority`;

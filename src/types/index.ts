@@ -6,7 +6,6 @@ import type {
   Message as DBMessage, 
   Metadata as DBMetadata,
   PingPongStatus,
-  Priority,
   MessageType 
 } from '../server/db/schema';
 
@@ -45,7 +44,6 @@ export interface CreatePingPongRequest {
   title: string;
   description?: string;
   responderId: number;
-  priority?: Priority;
   eta?: string;
 }
 
@@ -53,7 +51,6 @@ export interface UpdatePingPongRequest {
   title?: string;
   description?: string;
   status?: PingPongStatus;
-  priority?: Priority;
   eta?: string;
 }
 
@@ -67,11 +64,22 @@ export interface CreateMetadataRequest {
   value?: string;
 }
 
-export interface UpdateMetadataRequest {
-  value?: string;
+// API 响应类型
+export interface ApiResponse<T> {
+  data: T;
+  message?: string;
 }
 
-// 查询参数类型
+export interface PaginatedResponse<T> extends ApiResponse<T[]> {
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+// 查询类型
 export interface PaginationQuery {
   page?: number;
   limit?: number;
@@ -81,7 +89,6 @@ export interface PaginationQuery {
 
 export interface PingPongQuery extends PaginationQuery {
   status?: PingPongStatus | PingPongStatus[];
-  priority?: Priority | Priority[];
   requesterId?: number;
   responderId?: number;
   participantId?: number; // 参与者（请求者或响应者）
@@ -93,7 +100,8 @@ export interface PingPongQuery extends PaginationQuery {
 }
 
 export interface MessageQuery extends PaginationQuery {
-  pingpongId: number;
+  pingpongId?: number;
+  senderId?: number;
   messageType?: MessageType;
 }
 
@@ -103,104 +111,113 @@ export interface MetadataQuery extends PaginationQuery {
   name?: string;
 }
 
-// API 响应类型
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-  timestamp: string;
-}
-
-export interface PaginatedResponse<T = any> {
-  data: T[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
-
-// 统计数据类型
+// 统计类型
 export interface DashboardStats {
   totalPingpongs: number;
   activePingpongs: number;
   completedPingpongs: number;
-  overduePingpongs: number;
-  myCreatedPingpongs: number;
-  myAssignedPingpongs: number;
+  myActivePingpongs: number;
   myCompletedPingpongs: number;
   recentActivity: ActivityItem[];
 }
 
 export interface ActivityItem {
-  id: number;
-  type: 'created' | 'responded' | 'message' | 'closed' | 'updated';
-  pingpongId: number;
-  pingpongTitle: string;
-  userId: number;
-  username: string;
-  content?: string;
-  createdAt: string;
+  id: string;
+  type: 'pingpong_created' | 'pingpong_updated' | 'message_sent' | 'pingpong_closed';
+  title: string;
+  description: string;
+  timestamp: string;
+  user: DBUser;
+  relatedPingpong?: PingPong;
+}
+
+// UI 状态类型
+export interface PingPongFilters {
+  status: PingPongStatus[];
+  participants: number[];
+  dateRange: {
+    start?: string;
+    end?: string;
+  };
+  search: string;
+}
+
+export interface UIState {
+  isLoading: boolean;
+  error?: string | null;
+  selectedPingPong?: PingPong | null;
+  filters: PingPongFilters;
+  view: 'list' | 'kanban' | 'calendar';
+}
+
+// Form 类型
+export interface PingPongFormData {
+  title: string;
+  description: string;
+  responderId: number | null;
+  eta: string;
+}
+
+export interface MessageFormData {
+  content: string;
+  messageType: MessageType;
+}
+
+// 权限类型
+export interface UserPermissions {
+  canCreatePingPong: boolean;
+  canEditPingPong: boolean;
+  canDeletePingPong: boolean;
+  canViewAllPingpongs: boolean;
+  canManageUsers: boolean;
+}
+
+// WebSocket 类型
+export interface WebSocketMessage {
+  type: 'pingpong_update' | 'message_received' | 'user_online' | 'user_offline';
+  payload: any;
+  timestamp: string;
 }
 
 // 通知类型
 export interface Notification {
-  id: number;
-  userId: number;
-  type: 'ping_created' | 'ping_responded' | 'message_received' | 'ping_closed' | 'eta_reminder';
+  id: string;
+  type: 'info' | 'success' | 'warning' | 'error';
   title: string;
-  content: string;
-  relatedPingpongId?: number;
-  read: boolean;
-  createdAt: string;
-}
-
-// WebSocket 消息类型
-export interface WebSocketMessage {
-  type: 'message' | 'status_update' | 'notification' | 'user_online' | 'user_offline';
-  data: any;
+  message: string;
   timestamp: string;
+  read: boolean;
+  actionUrl?: string;
 }
 
-// 表单验证规则
-export interface ValidationRule {
-  required?: boolean;
-  minLength?: number;
-  maxLength?: number;
-  pattern?: RegExp;
-  custom?: (value: any) => boolean | string;
-}
-
-export interface FormValidationRules {
-  [key: string]: ValidationRule;
-}
-
-// 用户界面状态类型
-export interface UIState {
-  loading: boolean;
-  error?: string;
-  selectedPingpong?: PingPong;
-  filters: PingPongQuery;
-  viewMode: 'list' | 'kanban' | 'calendar';
-  sidebarOpen: boolean;
+// 文件上传类型
+export interface FileUpload {
+  id: string;
+  filename: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  url: string;
+  uploadedAt: string;
+  uploadedBy: number;
 }
 
 // 导出常量
 export const PINGPONG_STATUSES: PingPongStatus[] = ['ping', 'pong', 'closed'];
-export const PRIORITIES: Priority[] = ['low', 'medium', 'high', 'urgent'];
 export const MESSAGE_TYPES: MessageType[] = ['text', 'system'];
-
-export const PRIORITY_COLORS = {
-  low: 'success',
-  medium: 'warning', 
-  high: 'danger',
-  urgent: 'danger'
-} as const;
 
 export const STATUS_COLORS = {
   ping: 'warning',
   pong: 'primary', 
   closed: 'success'
+} as const;
+
+// 验证规则
+export const VALIDATION_RULES = {
+  TITLE_MIN_LENGTH: 3,
+  TITLE_MAX_LENGTH: 100,
+  DESCRIPTION_MAX_LENGTH: 1000,
+  MESSAGE_MAX_LENGTH: 2000,
+  METADATA_NAME_MAX_LENGTH: 50,
+  METADATA_VALUE_MAX_LENGTH: 200
 } as const;

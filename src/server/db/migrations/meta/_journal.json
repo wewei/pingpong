@@ -22,6 +22,20 @@
       "when": 1755797137468,
       "tag": "0002_bouncy_brood",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1755871884478,
+      "tag": "0003_unusual_iron_patriot",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1755878888983,
+      "tag": "0004_nasty_sprite",
+      "breakpoints": true
     }
   ]
 }

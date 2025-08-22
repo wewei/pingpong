@@ -26,7 +26,7 @@ export class UserService {
 
   async updateUser(id: number, userData: Partial<NewUser>): Promise<User | undefined> {
     const result = await db.update(users)
-      .set({ ...userData, updatedAt: new Date().toISOString() })
+      .set({ ...userData, updatedAt: Math.floor(Date.now() / 1000) })
       .where(eq(users.id, id))
       .returning();
     return result[0];

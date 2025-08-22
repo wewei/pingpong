@@ -34,8 +34,7 @@ async function seed() {
       requesterId: user1.id,
       responderId: user2.id,
       status: 'ping',
-      priority: 'high',
-      eta: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7天后
+      eta: Math.floor((Date.now() + 7 * 24 * 60 * 60 * 1000) / 1000), // 7天后
     }).returning();
 
     const pingpong2 = await db.insert(pingpongs).values({
@@ -44,8 +43,7 @@ async function seed() {
       requesterId: user2.id,
       responderId: user3.id,
       status: 'pong',
-      priority: 'medium',
-      eta: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3天后
+      eta: Math.floor((Date.now() + 3 * 24 * 60 * 60 * 1000) / 1000), // 3天后
     }).returning();
 
     const pingpong3 = await db.insert(pingpongs).values({
@@ -54,9 +52,8 @@ async function seed() {
       requesterId: user1.id,
       responderId: user3.id,
       status: 'closed',
-      priority: 'low',
-      eta: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2天前
-      closedAt: new Date().toISOString(),
+      eta: Math.floor((Date.now() - 2 * 24 * 60 * 60 * 1000) / 1000), // 2天前
+      closedAt: Math.floor(Date.now() / 1000),
     }).returning();
 
     console.log(`🏓 Created ${3} pingpongs`);
@@ -102,12 +99,6 @@ async function seed() {
       {
         userId: user1.id,
         pingpongId: pingpong1[0].id,
-        name: '优先级',
-        value: '紧急',
-      },
-      {
-        userId: user1.id,
-        pingpongId: pingpong1[0].id,
         name: '类别',
         value: '前端开发',
       },
@@ -125,7 +116,7 @@ async function seed() {
       },
     ]);
 
-    console.log(`🏷️ Created ${4} metadata items`);
+    console.log(`🏷️ Created ${3} metadata items`);
 
     // 显示统计信息
     const userCount = await userService.getUserCount();

@@ -8,12 +8,12 @@ export const users = sqliteTable('users', {
   email: text('email').notNull().unique(),
   password: text('password').notNull(),
   avatarUrl: text('avatar_url'),
-  createdAt: text('created_at')
+  createdAt: integer('created_at')
     .notNull()
-    .default(sql`(datetime('now'))`),
-  updatedAt: text('updated_at')
+    .default(sql`(unixepoch())`),
+  updatedAt: integer('updated_at')
     .notNull()
-    .default(sql`(datetime('now'))`),
+    .default(sql`(unixepoch())`),
 });
 
 // PingPong 任务表
@@ -28,15 +28,14 @@ export const pingpongs = sqliteTable('pingpongs', {
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   status: text('status', { enum: ['ping', 'pong', 'closed'] }).notNull().default('ping'),
-  priority: text('priority', { enum: ['low', 'medium', 'high', 'urgent'] }).default('medium'),
-  eta: text('eta'), // ISO 8601 timestamp
-  createdAt: text('created_at')
+  eta: integer('eta'), // Unix timestamp
+  createdAt: integer('created_at')
     .notNull()
-    .default(sql`(datetime('now'))`),
-  updatedAt: text('updated_at')
+    .default(sql`(unixepoch())`),
+  updatedAt: integer('updated_at')
     .notNull()
-    .default(sql`(datetime('now'))`),
-  closedAt: text('closed_at'),
+    .default(sql`(unixepoch())`),
+  closedAt: integer('closed_at'),
 });
 
 // 消息表
@@ -50,9 +49,9 @@ export const messages = sqliteTable('messages', {
     .references(() => users.id, { onDelete: 'cascade' }),
   content: text('content').notNull(),
   messageType: text('message_type', { enum: ['text', 'system'] }).default('text'),
-  createdAt: text('created_at')
+  createdAt: integer('created_at')
     .notNull()
-    .default(sql`(datetime('now'))`),
+    .default(sql`(unixepoch())`),
 });
 
 // 元数据表
@@ -66,12 +65,12 @@ export const metadata = sqliteTable('metadata', {
     .references(() => pingpongs.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   value: text('value'),
-  createdAt: text('created_at')
+  createdAt: integer('created_at')
     .notNull()
-    .default(sql`(datetime('now'))`),
-  updatedAt: text('updated_at')
+    .default(sql`(unixepoch())`),
+  updatedAt: integer('updated_at')
     .notNull()
-    .default(sql`(datetime('now'))`),
+    .default(sql`(unixepoch())`),
 }, (table) => ({
   uniqueUserPingpongName: unique().on(table.userId, table.pingpongId, table.name),
 }));
@@ -106,5 +105,4 @@ export type NewSession = typeof sessions.$inferInsert;
 
 // 枚举类型
 export type PingPongStatus = 'ping' | 'pong' | 'closed';
-export type Priority = 'low' | 'medium' | 'high' | 'urgent';
 export type MessageType = 'text' | 'system';
