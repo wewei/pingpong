@@ -64,31 +64,26 @@ async function seed() {
         pingpongId: pingpong1[0].id,
         senderId: user2.id,
         content: '我已经收到了这个任务，正在分析需求。你希望界面风格是什么样的？',
-        messageType: 'text',
       },
       {
         pingpongId: pingpong1[0].id,
         senderId: user1.id,
         content: '我希望是简洁现代的风格，类似于现在流行的设计系统，比如Material Design或者Ant Design。',
-        messageType: 'text',
       },
       {
         pingpongId: pingpong2[0].id,
         senderId: user3.id,
         content: '好的，我会使用Socket.io来实现。预计明天就能完成基础功能。',
-        messageType: 'text',
       },
       {
         pingpongId: pingpong3[0].id,
         senderId: user3.id,
         content: 'API文档已经完成，已经部署到了/docs路径。',
-        messageType: 'text',
       },
       {
         pingpongId: pingpong3[0].id,
         senderId: user3.id,
         content: '任务已完成并关闭。',
-        messageType: 'system',
       },
     ]);
 

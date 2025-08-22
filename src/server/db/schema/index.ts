@@ -48,7 +48,6 @@ export const messages = sqliteTable('messages', {
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   content: text('content').notNull(),
-  messageType: text('message_type', { enum: ['text', 'system'] }).default('text'),
   createdAt: integer('created_at')
     .notNull()
     .default(sql`(unixepoch())`),
@@ -105,4 +104,3 @@ export type NewSession = typeof sessions.$inferInsert;
 
 // 枚举类型
 export type PingPongStatus = 'ping' | 'pong' | 'closed';
-export type MessageType = 'text' | 'system';
