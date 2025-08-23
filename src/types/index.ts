@@ -5,8 +5,7 @@ import type {
   PingPong as DBPingPong, 
   Message as DBMessage, 
   Metadata as DBMetadata,
-  PingPongStatus,
-  MessageType 
+  PingPongStatus
 } from '../server/db/schema';
 
 // 扩展的 PingPong 类型（包含关联数据）
@@ -56,7 +55,6 @@ export interface UpdatePingPongRequest {
 
 export interface CreateMessageRequest {
   content: string;
-  messageType?: MessageType;
 }
 
 export interface CreateMetadataRequest {
@@ -102,7 +100,6 @@ export interface PingPongQuery extends PaginationQuery {
 export interface MessageQuery extends PaginationQuery {
   pingpongId?: number;
   senderId?: number;
-  messageType?: MessageType;
 }
 
 export interface MetadataQuery extends PaginationQuery {
@@ -160,7 +157,6 @@ export interface PingPongFormData {
 
 export interface MessageFormData {
   content: string;
-  messageType: MessageType;
 }
 
 // 权限类型
@@ -204,7 +200,6 @@ export interface FileUpload {
 
 // 导出常量
 export const PINGPONG_STATUSES: PingPongStatus[] = ['ping', 'pong', 'closed'];
-export const MESSAGE_TYPES: MessageType[] = ['text', 'system'];
 
 export const STATUS_COLORS = {
   ping: 'warning',
